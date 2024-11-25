@@ -13,35 +13,46 @@ const Select = ({
   label,
   type = "normal",
 }) => {
-  const [value, setValue] = useState();
+  const [value, setValue] = useState(null);
   const [collapsed, setCollapsed] = useState(true);
   const changeValue = (newValue) => {
-    onChange();
     setValue(newValue);
-    setCollapsed(newValue);
+    setCollapsed(true); // Replie le menu après sélection
+    onChange(newValue); // Appelle le callback onChange avec la nouvelle valeur
   };
+
   return (
     <div className={`SelectContainer ${type}`} data-testid="select-testid">
       {label && <div className="label">{label}</div>}
       <div className="Select">
         <ul>
-          <li className={collapsed ? "SelectTitle--show" : "SelectTitle--hide"}>
+          <li
+            className={collapsed ? "SelectTitle--show" : "SelectTitle--hide"}
+            onClick={() => setCollapsed(!collapsed)}
+          >
             {value || (!titleEmpty && "Toutes")}
           </li>
+
           {!collapsed && (
             <>
               {!titleEmpty && (
                 <li onClick={() => changeValue(null)}>
-                  <input defaultChecked={!value} name="selected" type="radio" />{" "}
+                  <input
+                    type="radio"
+                    name="selected"
+                    checked={!value}
+                    onChange={() => changeValue(null)}
+                  />{" "}
                   Toutes
                 </li>
               )}
               {selection.map((s) => (
                 <li key={s} onClick={() => changeValue(s)}>
                   <input
-                    defaultChecked={value === s}
-                    name="selected"
                     type="radio"
+                    name="selected"
+                    checked={value === s}
+                    onChange={() => changeValue(s)}
                   />{" "}
                   {s}
                 </li>
@@ -49,7 +60,11 @@ const Select = ({
             </>
           )}
         </ul>
+
+        {/* Champ caché pour soumettre la valeur */}
         <input type="hidden" value={value || ""} name={name} />
+
+        {/* Bouton pour ouvrir/fermer le menu */}
         <button
           type="button"
           data-testid="collapse-button-testid"

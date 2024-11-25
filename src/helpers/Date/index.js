@@ -13,4 +13,13 @@ export const MONTHS = {
   12: "décembre",
 };
 
-export const getMonth = (date) => MONTHS[date.getMonth()];
+export const getMonth = (inputDate) => {
+  const date = inputDate instanceof Date ? inputDate : new Date(inputDate);
+
+  if (Number.isNaN(date.getTime())) {
+    return ""; // Gérer les cas où la conversion échoue
+  }
+
+  const monthIndex = date.getMonth() + 1; // Ajuster l'index de 0-11 à 1-12
+  return MONTHS[monthIndex] || ""; // Retourner une chaîne vide si aucune correspondance
+};

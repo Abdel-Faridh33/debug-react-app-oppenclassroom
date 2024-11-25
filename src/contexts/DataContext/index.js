@@ -4,6 +4,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from "react";
 
@@ -19,28 +20,37 @@ export const api = {
 export const DataProvider = ({ children }) => {
   const [error, setError] = useState(null);
   const [data, setData] = useState(null);
+  const [last, setLast] = useState(null);
+
   const getData = useCallback(async () => {
     try {
-      setData(await api.loadData());
+      const loadedData = await api.loadData();
+
+      // Trouver l'élément avec la date la plus récente
+      const dernier = loadedData.events.reduce((latest, item) => {
+        const itemDate = new Date(item.date);
+        const latestDate = latest ? new Date(latest.date) : new Date(0); // Date par défaut très ancienne
+        return itemDate > latestDate ? item : latest;
+      }, null);
+      setData(loadedData);
+      setLast(dernier);
     } catch (err) {
       setError(err);
     }
   }, []);
+
   useEffect(() => {
-    if (data) return;
     getData();
-  });
-  
+  }, [getData]);
+
+  // Mémoriser la valeur du contexte pour éviter qu'elle ne change à chaque rendu
+  const contextValue = useMemo(
+    () => ({ data, error, last }),
+    [data, error, last]
+  );
+
   return (
-    <DataContext.Provider
-      // eslint-disable-next-line react/jsx-no-constructed-context-values
-      value={{
-        data,
-        error,
-      }}
-    >
-      {children}
-    </DataContext.Provider>
+    <DataContext.Provider value={contextValue}>{children}</DataContext.Provider>
   );
 };
 

@@ -4,25 +4,32 @@ import Field, { FIELD_TYPES } from "../../components/Field";
 import Select from "../../components/Select";
 import Button, { BUTTON_TYPES } from "../../components/Button";
 
-const mockContactApi = () => new Promise((resolve) => { setTimeout(resolve, 500); })
+const mockContactApi = () =>
+  new Promise((resolve) => {
+    setTimeout(resolve, 500);
+  });
 
 const Form = ({ onSuccess, onError }) => {
   const [sending, setSending] = useState(false);
+
   const sendContact = useCallback(
     async (evt) => {
       evt.preventDefault();
       setSending(true);
+
       // We try to call mockContactApi
       try {
-        await mockContactApi();
+        await mockContactApi(); // Simule l'envoi des données
         setSending(false);
+        onSuccess(); // Appelle la fonction onSuccess pour ouvrir le modal
       } catch (err) {
         setSending(false);
-        onError(err);
+        onError(err); // Appelle onError si une erreur survient
       }
     },
     [onSuccess, onError]
   );
+
   return (
     <form onSubmit={sendContact}>
       <div className="row">
